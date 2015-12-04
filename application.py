@@ -23,7 +23,7 @@ session = DBSession()
 @app.route('/')
 def show_home():
     categories = session.query(Category).all()
-    items = session.query(Item).order_by(desc(Item.id)).all()
+    items = session.query(Item).order_by(desc(Item.id)).limit(8).all()
     print len(items)
     if 'username' in login_session:
         logged_in = True
