@@ -61,9 +61,31 @@ def show_catalog(category_id):
     return render_template('show_catalog.html', categories=categories, category=category, items=items, logged_in=logged_in)
 
 
-@app.route('/catalog/<int:category_id>.json')
-def show_catalog_json(category_id):
-    return 'show catalog'
+def get_categories_dict():
+    categories = db.query(Category).all()
+    dict_categories = []
+    for c in categories:
+        dict_c = c.serialize
+        items = [i.serialize for i in db.query(Item).filter_by(category_id=c.id).order_by(desc(Item.id)).all()]
+        dict_c['items'] = items
+        dict_categories.append(dict_c)
+    return dict_categories
+
+
+@app.route('/catalog.json')
+def show_home_json():
+    categories = get_categories_dict()
+    return jsonify(categories=categories)
+
+
+@app.route('/catalog.xml')
+def show_home_xml():
+    categories = get_categories_dict()
+    print 'this is it ', categories[0].items
+    response = make_response(
+            render_template('catalog.xml', categories=categories), 200)
+    response.headers['Content-Type'] = 'application/xml'
+    return response
 
 
 @app.route('/catalog/new', methods=['POST', 'GET'])
