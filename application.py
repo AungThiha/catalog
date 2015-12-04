@@ -1,5 +1,6 @@
 # import general
 import os
+import datetime
 import random
 import string
 import httplib2
@@ -142,7 +143,10 @@ def add_item():
             extension = get_extension(f)
             if extension:
                 # photo named after item id to avoid overwriting
-                filename = str(item.id) + '.' + extension
+                # use timestamp in name to avoid caching headache after update
+                filename = secure_filename(
+                    str(item.id) + datetime.datetime.now().isoformat() +
+                    '.' + extension)
                 f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 item.photo = filename
                 db.add(item)
@@ -199,12 +203,24 @@ def edit_item(category_id, item_id):
             if update_photo:
                 f = request.files['photo']
                 extension = get_extension(f)
+                filename = ''
                 if extension:
-                    filename = str(item.id) + '.' + extension
-                    f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    item.photo = filename
-                else:
-                    item.photo = ''
+                    # photo named after item id to avoid overwriting
+                    # use timestamp in name to
+                    # avoid caching headache after update
+                    filename = secure_filename(
+                        str(item.id) + datetime.datetime.now().isoformat() +
+                        '.' + extension)
+                    abs_file = os.path.join(app.config['UPLOAD_FOLDER'],
+                                            filename)
+                    f.save(abs_file)
+
+                if item.photo:
+                    abs_file = os.path.join(app.config['UPLOAD_FOLDER'],
+                                            item.photo)
+                    if os.path.exists(abs_file):
+                        os.remove(abs_file)
+                item.photo = filename
             db.add(item)
             db.commit()
             flash("%s Successfully Edited" % item.name)
@@ -228,8 +244,12 @@ def delete_item(category_id, item_id):
                " in order to do what you want.');" \
                "}</script>" \
                "<body onload='myFunction()'>"
+    filename = item.photo
+    abs_file = os.path.join(app.config['UPLOAD_FOLDER'], item.photo)
     db.delete(item)
     db.commit()
+    if filename and os.path.exists(abs_file):
+        os.remove(abs_file)
     flash('Item Successfully Deleted')
     return redirect(url_for('show_home'))
 
