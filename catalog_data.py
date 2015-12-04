@@ -69,9 +69,3 @@ session.add(item9)
 session.commit()
 
 print 'Categories added!'
-
-
-
-
-
-
