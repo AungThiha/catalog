@@ -242,13 +242,15 @@ def delete_item(category_id, item_id):
                " in order to do what you want.');" \
                "}</script>" \
                "<body onload='myFunction()'>"
+    itemname = item.name
     filename = item.photo
-    abs_file = os.path.join(app.config['UPLOAD_FOLDER'], item.photo)
     db.delete(item)
     db.commit()
-    if filename and os.path.exists(abs_file):
-        os.remove(abs_file)
-    flash('Item Successfully Deleted')
+    if filename:
+        abs_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(abs_file):
+            os.remove(abs_file)
+    flash('%s Successfully Deleted', itemname)
     return redirect(url_for('show_home'))
 
 
