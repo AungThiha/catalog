@@ -180,11 +180,9 @@ def show_item(category_id, item_id):
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit',
            methods=['POST', 'GET'])
 def edit_item(category_id, item_id):
-    if 'username' not in session:
-        return redirect('/login')
     item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
     # protect CSRF attack
-    if item.user_id != session['user_id']:
+    if not session.get('user_id') or item.user_id != session['user_id']:
         return "<script> function myFunction() { " \
                "alert('You are not authorized to edit this item." \
                " Please create your own item" \
@@ -233,11 +231,9 @@ def edit_item(category_id, item_id):
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/delete')
 def delete_item(category_id, item_id):
-    if 'username' not in session:
-        return redirect('/login')
     item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
     # protect CSRF attack
-    if item.user_id != session['user_id']:
+    if not session.get('user_id') or item.user_id != session['user_id']:
         return "<script> function myFunction() { " \
                "alert('You are not authorized to delete this item." \
                " Please create your own item" \
