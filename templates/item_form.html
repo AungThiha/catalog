@@ -1,0 +1,57 @@
+<div class="form-group">
+    <label for="title" class="col-lg-2">Title</label>
+
+    <div class="col-lg-10">
+        <input type="text" class="form-control" id="title" placeholder="Title" name="name"
+                {% if item and item.name %}
+               value="{{ item.name }}"
+                {% endif %}
+                >
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="photo" class="col-lg-2">Photo</label>
+
+    <div class="col-lg-10">
+        <div class="input-group image-preview">
+            <input type="text" class="form-control image-preview-filename" disabled="disabled">
+                            <span class="input-group-btn">
+                                <!-- image-preview-clear button -->
+                                <button type="button" class="btn btn-default image-preview-clear" style="display:none;">
+                                    <span class="glyphicon glyphicon-remove"></span> Clear
+                                </button>
+                                <!-- image-preview-input -->
+                                <div class="btn btn-default image-preview-input">
+                                    <span class="glyphicon glyphicon-folder-open"></span>
+                                    <span class="image-preview-input-title">Browse</span>
+                                    <input type="file" accept="image/png, image/jpeg, image/jpg" name="photo"/>
+                                </div>
+                            </span>
+        </div>
+        <p class="help-block">allow only png, jpg and jpeg</p>
+    </div>
+</div>
+<div class="form-group">
+    <label for="description" class="col-lg-2">Description</label>
+
+    <div class="col-lg-10">
+                    <textarea class="form-control" rows="3" placeholder="Description" name="description"
+                              id="description">{% if item and item.description %}{{ item.description }}{% endif %}</textarea>
+    </div>
+</div>
+<div class="form-group">
+    <label for="category" class="col-lg-2">Category</label>
+
+    <div class="col-lg-10">
+        <select class="form-control" name="category_id">
+            {% for c in categories %}
+                {% if c == category %}
+                    <option value="{{ c.id }}" selected>{{ c.name }}</option>
+                {% else %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+</div>

@@ -34,7 +34,8 @@ class Category(Base):
 
     id = Column(Integer,
                 primary_key=True)
-    name = Column(String(80), nullable=False)
+    name = Column(String(80), nullable=False,
+                  unique=True)
 
     @property
     def serialize(self):

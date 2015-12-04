@@ -21,7 +21,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 db = DBSession()
 
-ALLOWED_EXT = set(['png', 'jpg', 'jpeg'])
+ALLOWED_EXT = ['png', 'jpg', 'jpeg']
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 
@@ -41,7 +41,6 @@ def uploaded_photo(filename):
 @app.route('/')
 def show_home():
     categories = db.query(Category).all()
-    print categories[8]
     items = db.query(Item).order_by(desc(Item.id)).all()
     if 'username' in login_session:
         logged_in = True
@@ -67,15 +66,18 @@ def show_catalog_json(category_id):
     return 'show catalog'
 
 
-@app.route('/catalog/new', methods=['POST','GET'])
+@app.route('/catalog/new', methods=['POST', 'GET'])
 def add_item():
     if 'username' not in login_session:
         return redirect('/login')
+    name = None
+    description = None
     if request.method == 'POST':
         category_id = request.form['category_id']
         name = request.form['name']
+        description=request.form['description']
         if name:
-            item = Item(name=name, description=request.form['description'],
+            item = Item(name=name, description=description,
                         category_id=category_id, user_id=login_session['user_id'])
             db.add(item)
             db.commit()
@@ -96,22 +98,74 @@ def add_item():
         category = db.query(Category).filter_by(id=request.args.get('category_id')).one()
     else:
         category = None
-    return render_template('add_item.html', categories=categories, category=category, logged_in=True)
+    item = {'name': name,
+            'description': description}
+    return render_template('add_item.html', categories=categories, category=category,
+                           item=item, logged_in=True)
 
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/')
 def show_item(category_id, item_id):
-    return 'show item'
+    if 'username' in login_session:
+        logged_in = True
+    else:
+        logged_in = False
+    item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
+    return render_template('item.html', item=item, logged_in=logged_in)
 
 
-@app.route('/catalog/<int:category_id>/<int:item_id>/edit')
+@app.route('/catalog/<int:category_id>/<int:item_id>/edit', methods=['POST', 'GET'])
 def edit_item(category_id, item_id):
-    return 'edit item'
+    if 'username' not in login_session:
+        return redirect('/login')
+    item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
+    if item.user_id != login_session['user_id']:
+        return "<script> function myFunction() { " \
+               "alert('You are not authorized to edit this item." \
+               " Please create your own item in order to do what you want.');" \
+               "}</script>" \
+               "<body onload='myFunction()'>"
+    if request.method == 'POST':
+        name = request.form['name']
+        item.description = request.form['description']
+        item.category_id = request.form['category_id']
+        if name:
+            item.name = name
+            update_photo = request.form.getlist('update_photo')
+            if update_photo:
+                f = request.files['photo']
+                extension = get_extension(f)
+                if extension:
+                    filename = str(item.id) + '.' + extension
+                    f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    item.photo = filename
+                else:
+                    item.photo = ''
+            db.add(item)
+            db.commit()
+            flash("New item %s Successfully Added" % item.name)
+            return redirect(url_for('show_home'))
+        flash("Name cannot be empty!")
+    categories = db.query(Category).all()
+    return render_template('edit_item.html', categories=categories, category=None,
+                           item=item, logged_in=True)
 
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/delete')
 def delete_item(category_id, item_id):
-    return 'delete item'
+    if 'username' not in login_session:
+        return redirect('/login')
+    item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
+    if item.user_id != login_session['user_id']:
+        return "<script> function myFunction() { " \
+               "alert('You are not authorized to delete this item." \
+               " Please create your own item in order to do what you want.');" \
+               "}</script>" \
+               "<body onload='myFunction()'>"
+    db.delete(item)
+    db.commit()
+    flash('Item Successfully Deleted')
+    return redirect(url_for('show_home'))
 
 
 # Create a state token to prevent request forgery.
