@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Catalog, Base
+from database_setup import Category, Base, Item, User
 
 __author__ = 'aungthiha'
 
@@ -21,14 +21,15 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 # predefined Catalogs
-cat1 = Catalog(name='Soccer')
-cat2 = Catalog(name='Basketball')
-cat3 = Catalog(name='Frisbee')
-cat4 = Catalog(name='Snowboarding')
-cat5 = Catalog(name='Rock Climbing')
-cat6 = Catalog(name='Foosball')
-cat7 = Catalog(name='Skating')
-cat8 = Catalog(name='Hockey')
+cat1 = Category(name='Soccer')
+cat2 = Category(name='Baseball')
+cat3 = Category(name='Basketball')
+cat4 = Category(name='Frisbee')
+cat5 = Category(name='Snowboarding')
+cat6 = Category(name='Rock Climbing')
+cat7 = Category(name='Foosball')
+cat8 = Category(name='Skating')
+cat9 = Category(name='Hockey')
 
 session.add(cat1)
 session.add(cat2)
@@ -38,10 +39,35 @@ session.add(cat5)
 session.add(cat6)
 session.add(cat7)
 session.add(cat8)
-
 session.commit()
 
-print 'Catalogs added!'
+# dummy user
+user = User(name="aungthiha", email="mr.aungthiha@gmail.com")
+session.add(user)
+session.commit()
+
+# dummy items
+item1 = Item(name="Stick", category_id=9, user_id=1)
+item2 = Item(name="Goggles", category_id=5, user_id=1)
+item3 = Item(name="Snowboard", category_id=5, user_id=1)
+item4 = Item(name="Two shinguards", category_id=1, user_id=1)
+item5 = Item(name="Shinguards", category_id=1, user_id=1)
+item6 = Item(name="Frisbee", category_id=4, user_id=1)
+item7 = Item(name="Bat", category_id=2, user_id=1)
+item8 = Item(name="Jersey", category_id=1, user_id=1)
+item9 = Item(name="Soccer Cleats", category_id=1, user_id=1)
+session.add(item1)
+session.add(item2)
+session.add(item3)
+session.add(item4)
+session.add(item5)
+session.add(item6)
+session.add(item7)
+session.add(item8)
+session.add(item9)
+session.commit()
+
+print 'Categories added!'
 
 
 

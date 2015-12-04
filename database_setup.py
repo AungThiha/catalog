@@ -28,9 +28,9 @@ class User(Base):
         }
 
 
-class Catalog(Base):
+class Category(Base):
 
-    __tablename__ = 'catalog'
+    __tablename__ = 'category'
 
     id = Column(Integer,
                 primary_key=True)
@@ -53,9 +53,9 @@ class Item(Base):
     name = Column(String(80),
                   nullable=False)
     description = Column(String(250))
-    catalog_id = Column(Integer,
-                        ForeignKey('catalog.id'))
-    catalog = relationship(Catalog)
+    category_id = Column(Integer,
+                         ForeignKey('category.id'))
+    category = relationship(Category)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
