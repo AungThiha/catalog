@@ -52,6 +52,7 @@ class Item(Base):
                 primary_key=True)
     name = Column(String(80),
                   nullable=False)
+    photo = Column(String)
     description = Column(String(250))
     category_id = Column(Integer,
                          ForeignKey('category.id'))

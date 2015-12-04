@@ -39,6 +39,7 @@ session.add(cat5)
 session.add(cat6)
 session.add(cat7)
 session.add(cat8)
+session.add(cat9)
 session.commit()
 
 # dummy user

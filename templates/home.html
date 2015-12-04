@@ -11,16 +11,7 @@
         </div>
         <div class="col-lg-9">
             <h1>8 Latest Items</h1>
-            <ul>
-                {% for i in items %}
-                    <li><a href="{{ url_for('show_item', category_id=i.category_id, item_id=i.id) }}">{{ i.name }} ({{ categories[i.category_id - 1].name }})</a>
-                    </li>
-                {% endfor %}
-            </ul>
-
-            {% if logged_in %}
-                <a href="{{ url_for('add_item') }}" class="btn-default btn"><span class="glyphicon glyphicon-plus"></span> Add item</a>
-            {% endif %}
+            {% include "item_list.html" %}
         </div>
     </div>
 {% endblock %}

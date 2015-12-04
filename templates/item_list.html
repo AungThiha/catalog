@@ -1,0 +1,36 @@
+{% if logged_in %}
+    <a href="{{ url_for('add_item') }}" class="btn-default btn btn-add-item"><span
+            class="glyphicon glyphicon-plus"></span> Add item</a>
+{% endif %}
+{% for i in items %}
+    <div class="well">
+        <div class="media">
+            <div class="pull-left" href="#">
+                {% if i.photo %}
+                    <img src="{{ url_for('uploaded_photo', filename=i.photo) }}" alt="Image Preview"
+                         class="media-object">
+                {% else %}
+                    <img src="{{ url_for('static', filename='img/placeholder.png') }}" alt="Image Preview"
+                         class="media-object">
+                {% endif %}
+            </div>
+
+            <div class="media-body">
+                <h4 class="media-heading"><a
+                        href="{{ url_for('show_item', category_id=i.category_id, item_id=i.id) }}">{{ i.name }}
+                    {% if homepage %}
+                    ({{ categories[i.category_id - 1].name }})
+                    {% endif %}
+                </a></h4>
+
+                <p>
+                    {% if i.description and i.description|length > 400 %}
+                        {{ i.description[:400] }}...
+                    {% elif i.description %}
+                        {{ i.description }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+{% endfor %}

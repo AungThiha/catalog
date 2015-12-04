@@ -41,12 +41,13 @@ def uploaded_photo(filename):
 @app.route('/')
 def show_home():
     categories = db.query(Category).all()
-    items = db.query(Item).order_by(desc(Item.id)).limit(8).all()
+    print categories[8]
+    items = db.query(Item).order_by(desc(Item.id)).all()
     if 'username' in login_session:
         logged_in = True
     else:
         logged_in = False
-    return render_template('home.html', categories=categories, items=items, logged_in=logged_in)
+    return render_template('home.html', categories=categories, items=items, logged_in=logged_in, homepage=True)
 
 
 @app.route('/catalog/<int:category_id>/')
@@ -84,6 +85,9 @@ def add_item():
             if extension:
                 filename = str(item.id) + '.' + extension
                 f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                item.photo = filename
+                db.add(item)
+                db.commit()
             flash("New item %s Successfully Added" % item.name)
             return redirect(url_for('show_catalog', category_id=category_id))
         flash("Name cannot be empty!")
