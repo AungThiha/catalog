@@ -46,7 +46,7 @@
     <div class="col-lg-10">
         <select class="form-control" name="category_id">
             {% for c in categories %}
-                {% if c == category %}
+                {% if item.category_id and c.id == item.category_id %}
                     <option value="{{ c.id }}" selected>{{ c.name }}</option>
                 {% else %}
                     <option value="{{ c.id }}">{{ c.name }}</option>

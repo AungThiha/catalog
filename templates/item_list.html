@@ -1,7 +1,3 @@
-{% if logged_in %}
-    <a href="{{ url_for('add_item') }}" class="btn-default btn btn-add-item"><span
-            class="glyphicon glyphicon-plus"></span> Add item</a>
-{% endif %}
 {% for i in items %}
     <div class="well">
         <div class="media">

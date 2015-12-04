@@ -1,31 +1,44 @@
+# import general
 import os
 import random
 import string
 import httplib2
 import json
 import requests
+from werkzeug.utils import secure_filename
+
+# import flask
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash, \
     session, make_response, send_from_directory
+
+# import oauth2
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
+
+# import database stuffs
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item, User
-from werkzeug.utils import secure_filename
-
-app = Flask(__name__)
 
 # Connect to Database and create database session
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
-
 DBSession = sessionmaker(bind=engine)
 db = DBSession()
 
+# setup flask app
+app = Flask(__name__)
+
+# setup upload files config
 ALLOWED_EXT = ['png', 'jpg', 'jpeg']
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 
 def get_extension(f):
+    """
+    get file extension from filename
+    f:
+      filename
+    """
     if f and '.' in f.filename:
         file_ext = f.filename.rsplit('.', 1)[1]
         if file_ext in ALLOWED_EXT:
@@ -34,6 +47,9 @@ def get_extension(f):
 
 @app.route('/uploads/<filename>')
 def uploaded_photo(filename):
+    """
+    routes to get uploaded photo
+    """
     filename = secure_filename(filename)
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
@@ -41,11 +57,14 @@ def uploaded_photo(filename):
 @app.route('/')
 def show_home():
     categories = db.query(Category).all()
+    # with desc(Item.id), it return latest items on top
     items = db.query(Item).order_by(desc(Item.id)).all()
     if 'username' in session:
         logged_in = True
     else:
         logged_in = False
+    # There's a category name within parentheses for each item and these are shown only for homepage
+    # The homepage variable is used to distinguish between homepage and catalog page
     return render_template('home.html', categories=categories, items=items, logged_in=logged_in, homepage=True)
 
 
@@ -53,11 +72,13 @@ def show_home():
 def show_catalog(category_id):
     categories = db.query(Category).all()
     category = db.query(Category).filter_by(id=category_id).one()
+    # with desc(Item.id), it return latest items on top
     items = db.query(Item).filter_by(category_id=category_id).order_by(desc(Item.id)).all()
     if 'username' in session:
         logged_in = True
     else:
         logged_in = False
+    # category variable is used to define h1 for the item list
     return render_template('show_catalog.html', categories=categories, category=category, items=items, logged_in=logged_in)
 
 
@@ -94,19 +115,23 @@ def add_item():
         return redirect('/login')
     name = None
     description = None
+    category_id = '0'
     if request.method == 'POST':
         category_id = request.form['category_id']
-        name = request.form['name']
-        description=request.form['description']
+        name = request.form['name'].strip()
+        description = request.form['description']
+        # validate name is not empty
         if name:
             item = Item(name=name, description=description,
                         category_id=category_id, user_id=session['user_id'])
             db.add(item)
             db.commit()
             f = request.files['photo']
+            # validate file is with allowed extension and
+            # get back the extension
             extension = get_extension(f)
-            print f.filename
             if extension:
+                # photo named after item id to avoid overwriting
                 filename = str(item.id) + '.' + extension
                 f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 item.photo = filename
@@ -116,13 +141,15 @@ def add_item():
             return redirect(url_for('show_catalog', category_id=category_id))
         flash("Name cannot be empty!")
     categories = db.query(Category).all()
-    if request.args.get('category_id'):
-        category = db.query(Category).filter_by(id=request.args.get('category_id')).one()
-    else:
-        category = None
+    if category_id == '0' and request.args.get('category_id'):
+        category_id = request.args.get('category_id')
     item = {'name': name,
-            'description': description}
-    return render_template('add_item.html', categories=categories, category=category,
+            'description': description,
+            'category_id': int(category_id)}
+    # if reload the page when validation for name is failed
+    # so it needs to refill previous entered data when reload
+    # for that, it use item variable
+    return render_template('add_item.html', categories=categories,
                            item=item, logged_in=True)
 
 
@@ -141,6 +168,7 @@ def edit_item(category_id, item_id):
     if 'username' not in session:
         return redirect('/login')
     item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
+    # protect CSRF attack
     if item.user_id != session['user_id']:
         return "<script> function myFunction() { " \
                "alert('You are not authorized to edit this item." \
@@ -153,6 +181,8 @@ def edit_item(category_id, item_id):
         item.category_id = request.form['category_id']
         if name:
             item.name = name
+            # value from 'Update Photo' checkbox
+            # it updates the photo only if the checkbox is checked
             update_photo = request.form.getlist('update_photo')
             if update_photo:
                 f = request.files['photo']
@@ -165,11 +195,11 @@ def edit_item(category_id, item_id):
                     item.photo = ''
             db.add(item)
             db.commit()
-            flash("New item %s Successfully Added" % item.name)
+            flash("%s Successfully Edited" % item.name)
             return redirect(url_for('show_home'))
         flash("Name cannot be empty!")
     categories = db.query(Category).all()
-    return render_template('edit_item.html', categories=categories, category=None,
+    return render_template('edit_item.html', categories=categories,
                            item=item, logged_in=True)
 
 
@@ -178,6 +208,7 @@ def delete_item(category_id, item_id):
     if 'username' not in session:
         return redirect('/login')
     item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
+    # protect CSRF attack
     if item.user_id != session['user_id']:
         return "<script> function myFunction() { " \
                "alert('You are not authorized to delete this item." \
@@ -196,9 +227,11 @@ def delete_item(category_id, item_id):
 def show_login():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     session['state'] = state
+    # read gplus client id from client_secrets.json
     gplus_client_id = json.loads(
             open('client_secrets.json', 'r').read())['web']['client_id']
-    fb_app_id = web = json.loads(open('fb_client_secrets.json', 'r').read())['web']['app_id']
+    # read fb app id from fb_client_secrets.json
+    fb_app_id = json.loads(open('fb_client_secrets.json', 'r').read())['web']['app_id']
     return render_template('login.html', STATE=state, gplus_client_id=gplus_client_id, fb_app_id=fb_app_id)
 
 

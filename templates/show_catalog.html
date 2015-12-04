@@ -11,6 +11,10 @@
         </div>
         <div class="col-lg-9">
             <h1>{{ category.name }} Items ({{ items|length }} items)</h1>
+            {% if logged_in %}
+                <a href="{{ url_for('add_item', category_id=category.id) }}" class="btn-default btn btn-add-item"><span
+                        class="glyphicon glyphicon-plus"></span> Add item</a>
+            {% endif %}
             {% include "item_list.html" %}
         </div>
     </div>
