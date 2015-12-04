@@ -152,7 +152,8 @@ def add_item():
                 db.add(item)
                 db.commit()
             flash("New item %s Successfully Added" % item.name)
-            return redirect(url_for('show_item', category_id=category_id, item_id=item.id))
+            return redirect(url_for('show_item',
+                                    category_id=category_id, item_id=item.id))
         flash("Name cannot be empty!")
     categories = db.query(Category).all()
     if category_id == '0' and request.args.get('category_id'):
@@ -176,7 +177,8 @@ def show_item(category_id, item_id):
     else:
         logged_in = False
         owner = False
-    return render_template('item.html', item=item, owner=owner, logged_in=logged_in)
+    return render_template('item.html', item=item,
+                           owner=owner, logged_in=logged_in)
 
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit',
@@ -224,7 +226,8 @@ def edit_item(category_id, item_id):
             db.add(item)
             db.commit()
             flash("%s Successfully Edited" % item.name)
-            return redirect(url_for('show_item', category_id=category_id, item_id=item.id))
+            return redirect(url_for('show_item',
+                                    category_id=category_id, item_id=item.id))
         flash("Name cannot be empty!")
     categories = db.query(Category).all()
     return render_template('edit_item.html', categories=categories,
@@ -250,7 +253,7 @@ def delete_item(category_id, item_id):
         abs_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         if os.path.exists(abs_file):
             os.remove(abs_file)
-    flash('%s Successfully Deleted'% itemname)
+    flash('%s Successfully Deleted' % itemname)
     return redirect(url_for('show_home'))
 
 
