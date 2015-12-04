@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-3">
+            <h1>Categories</h1>
+            <ul class="verticalLine">
+                {% for c in categories %}
+                    <li><a href="{{ url_for('show_catalog', category_id=c.id) }}">{{ c.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-lg-9">
+            <h1>8 Latest Items</h1>
+            <ul>
+                {% for i in items %}
+                    <li><a href="{{ url_for('show_item', category_id=i.category_id, item_id=i.id) }}">{{ i.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% if logged_in %}
+                <a href="{{ url_for('add_item') }}" class="btn-primary btn"><span class="glyphicon glyphicon-plus"></span> Add item</a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
