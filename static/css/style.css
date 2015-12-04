@@ -2,6 +2,13 @@ body {
     padding-top: 50px;
 }
 
+.flash {
+	background-color: #98FB98;
+	width:100%;
+	text-decoration: none;
+
+}
+
 ul {
     list-style-type: none;
     margin-left: 0;

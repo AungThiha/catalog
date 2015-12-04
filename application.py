@@ -169,12 +169,14 @@ def add_item():
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/')
 def show_item(category_id, item_id):
+    item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
     if 'username' in session:
         logged_in = True
+        owner = item.user_id == session['user_id']
     else:
         logged_in = False
-    item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
-    return render_template('item.html', item=item, logged_in=logged_in)
+        owner = False
+    return render_template('item.html', item=item, owner=owner, logged_in=logged_in)
 
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit',
