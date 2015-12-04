@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <!-- <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css"> -->
-    <link rel="stylesheet" type="text/css" href="static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <meta name="description" content="Udacity Nanodegree Project 3">
     <meta name="author" content="Aung Thiha">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,13 +15,13 @@
 <nav class="navbar navbar-inverse navbar-fixed-top" id="main-navigation" role="navigation">
     <div class="container">
         <div class="navbar-header">
-            <a href="/" class="navbar-brand">Catalog App</a>
+            <a href="{{ url_for('show_home') }}" class="navbar-brand">Catalog App</a>
         </div>
         <!-- end navbar-header -->
         {% if logged_in %}
-            <a href="/logout" class="btn btn-danger navbar-btn navbar-right">Logout</a>
+            <a href="{{ url_for('show_login') }}" class="btn btn-danger navbar-btn navbar-right">Logout</a>
         {% else %}
-            <a href="/login" class="btn btn-success navbar-btn navbar-right">Login</a>
+            <a href="{{ url_for('disconnect') }}" class="btn btn-success navbar-btn navbar-right">Login</a>
         {% endif %}
         <!-- end navbar-right -->
     </div>
@@ -32,8 +32,8 @@
     {% endblock %}
 </div>
 
-<script type="text/javascript" src="static/js/jquery-2.1.4.min.js"></script>
-<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.1.4.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 
 </body>
 </html>

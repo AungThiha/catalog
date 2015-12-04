@@ -24,7 +24,6 @@ session = DBSession()
 def show_home():
     categories = session.query(Category).all()
     items = session.query(Item).order_by(desc(Item.id)).limit(8).all()
-    print len(items)
     if 'username' in login_session:
         logged_in = True
     else:
@@ -34,7 +33,14 @@ def show_home():
 
 @app.route('/catalog/<int:category_id>/')
 def show_catalog(category_id):
-    return 'show catalog'
+    categories = session.query(Category).all()
+    category = session.query(Category).filter_by(id=category_id).one()
+    items = session.query(Item).filter_by(category_id=category_id).all()
+    if 'username' in login_session:
+        logged_in = True
+    else:
+        logged_in = False
+    return render_template('show_catalog.html', categories=categories, category=category, items=items, logged_in=logged_in)
 
 
 @app.route('/catalog/<int:category_id>.json')

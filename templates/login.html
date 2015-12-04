@@ -41,7 +41,7 @@
                         $('#signinButton').attr('style', 'display: none');
                         $('#fbsigninButton').attr('style', 'display: none');
                         setTimeout(function () {
-                            window.location.href = "/";
+                            window.location.href = "{{ url_for('show_home') }}";
                         }, 4000);
 
                     } else if (authResult['error']) {
@@ -98,7 +98,7 @@
                         $('#signinButton').attr('style', 'display: none');
                         $('#fbsigninButton').attr('style', 'display: none');
                         setTimeout(function () {
-                            window.location.href = "/";
+                            window.location.href = "{{ url_for('show_home') }}";
                         }, 4000);
 
                     } else {

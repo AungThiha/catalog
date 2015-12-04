@@ -10,10 +10,10 @@
             </ul>
         </div>
         <div class="col-lg-9">
-            <h1>8 Latest Items</h1>
+            <h1>{{ category.name }} Items ({{ items|length }} items)</h1>
             <ul>
                 {% for i in items %}
-                    <li><a href="{{ url_for('show_item', category_id=i.category_id, item_id=i.id) }}">{{ i.name }} ({{ categories[i.category_id - 1].name }})</a>
+                    <li><a href="{{ url_for('show_item', category_id=i.category_id, item_id=i.id) }}">{{ i.name }}</a>
                     </li>
                 {% endfor %}
             </ul>
