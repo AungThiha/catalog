@@ -1,14 +1,16 @@
+import os
 import random
 import string
 import httplib2
 import json
 import requests
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash, \
-    session as login_session, make_response
+    session as login_session, make_response, send_from_directory
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item, User
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -17,13 +19,29 @@ engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
-session = DBSession()
+db = DBSession()
+
+ALLOWED_EXT = set(['png', 'jpg', 'jpeg'])
+app.config['UPLOAD_FOLDER'] = 'uploads'
+
+
+def get_extension(f):
+    if f and '.' in f.filename:
+        file_ext = f.filename.rsplit('.', 1)[1]
+        if file_ext in ALLOWED_EXT:
+            return file_ext
+
+
+@app.route('/uploads/<filename>')
+def uploaded_photo(filename):
+    filename = secure_filename(filename)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 @app.route('/')
 def show_home():
-    categories = session.query(Category).all()
-    items = session.query(Item).order_by(desc(Item.id)).limit(8).all()
+    categories = db.query(Category).all()
+    items = db.query(Item).order_by(desc(Item.id)).limit(8).all()
     if 'username' in login_session:
         logged_in = True
     else:
@@ -33,9 +51,9 @@ def show_home():
 
 @app.route('/catalog/<int:category_id>/')
 def show_catalog(category_id):
-    categories = session.query(Category).all()
-    category = session.query(Category).filter_by(id=category_id).one()
-    items = session.query(Item).filter_by(category_id=category_id).all()
+    categories = db.query(Category).all()
+    category = db.query(Category).filter_by(id=category_id).one()
+    items = db.query(Item).filter_by(category_id=category_id).order_by(desc(Item.id)).all()
     if 'username' in login_session:
         logged_in = True
     else:
@@ -48,9 +66,33 @@ def show_catalog_json(category_id):
     return 'show catalog'
 
 
-@app.route('/catalog/new')
+@app.route('/catalog/new', methods=['POST','GET'])
 def add_item():
-    return 'add item'
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        category_id = request.form['category_id']
+        name = request.form['name']
+        if name:
+            item = Item(name=name, description=request.form['description'],
+                        category_id=category_id, user_id=login_session['user_id'])
+            db.add(item)
+            db.commit()
+            f = request.files['photo']
+            extension = get_extension(f)
+            print f.filename
+            if extension:
+                filename = str(item.id) + '.' + extension
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            flash("New item %s Successfully Added" % item.name)
+            return redirect(url_for('show_catalog', category_id=category_id))
+        flash("Name cannot be empty!")
+    categories = db.query(Category).all()
+    if request.args.get('category_id'):
+        category = db.query(Category).filter_by(id=request.args.get('category_id')).one()
+    else:
+        category = None
+    return render_template('add_item.html', categories=categories, category=category, logged_in=True)
 
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/')
@@ -257,7 +299,7 @@ def fbdisconnect():
 
 # Disconnect based on provider
 @app.route('/logout')
-def disconnect():
+def logout():
     if 'provider' in login_session:
         if login_session['provider'] == 'google':
             gdisconnect()
@@ -280,14 +322,14 @@ def disconnect():
 
 def get_user_id(email):
     try:
-        user = session.query(User).filter_by(email=email).one()
+        user = db.query(User).filter_by(email=email).one()
         return user.id
     except:
         return None
 
 
 def get_user(user_id):
-    user = session.query(User).filter_by(id=user_id).one()
+    user = db.query(User).filter_by(id=user_id).one()
     return user
 
 
@@ -295,9 +337,9 @@ def create_user(login_session):
     new_user = User(name=login_session['username'],
                     email=login_session['email'],
                     picture=login_session['picture'])
-    session.add(new_user)
-    session.commit()
-    user = session.query(User).filter_by(email=login_session['email']).one()
+    db.add(new_user)
+    db.commit()
+    user = db.query(User).filter_by(email=login_session['email']).one()
     return user.id
 
 

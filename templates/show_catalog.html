@@ -19,7 +19,7 @@
             </ul>
 
             {% if logged_in %}
-                <a href="{{ url_for('add_item') }}" class="btn-default btn"><span class="glyphicon glyphicon-plus"></span> Add item</a>
+                <a href="{{ url_for('add_item', category_id=category.id) }}" class="btn-default btn"><span class="glyphicon glyphicon-plus"></span> Add item</a>
             {% endif %}
         </div>
     </div>

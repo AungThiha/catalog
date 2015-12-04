@@ -19,21 +19,22 @@
         </div>
         <!-- end navbar-header -->
         {% if logged_in %}
-            <a href="{{ url_for('show_login') }}" class="btn btn-danger navbar-btn navbar-right">Logout</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger navbar-btn navbar-right">Logout</a>
         {% else %}
-            <a href="{{ url_for('disconnect') }}" class="btn btn-success navbar-btn navbar-right">Login</a>
+            <a href="{{ url_for('show_login') }}" class="btn btn-success navbar-btn navbar-right">Login</a>
         {% endif %}
         <!-- end navbar-right -->
     </div>
     <!-- end container -->
 </nav>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.1.4.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <div class="container">
     {% block content %}
     {% endblock %}
 </div>
 
-<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.1.4.min.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 
 </body>
 </html>
