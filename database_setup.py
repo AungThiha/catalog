@@ -58,14 +58,10 @@ class Item(Base):
     category_id = Column(Integer,
                          ForeignKey('category.id'),
                          nullable=False)
-    category = relationship(Category,
-                            single_parent=True,
-                            cascade="all, delete-orphan")
+    category = relationship(Category)
     user_id = Column(Integer, ForeignKey('user.id'),
                      nullable=False)
-    user = relationship(User,
-                        single_parent=True,
-                        cascade="all, delete-orphan")
+    user = relationship(User)
 
     @property
     def serialize(self):
