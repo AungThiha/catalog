@@ -7,6 +7,7 @@ import httplib2
 import json
 import requests
 from werkzeug.utils import secure_filename
+from functools import wraps
 
 # import flask
 from flask import Flask, render_template, request, \
@@ -33,6 +34,7 @@ app = Flask(__name__)
 # setup upload files config
 ALLOWED_EXT = ['png', 'jpg', 'jpeg']
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
 def get_extension(f):
@@ -56,12 +58,21 @@ def uploaded_photo(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('username'):
+            return redirect(url_for('show_login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/')
 def show_home():
     categories = db.query(Category).all()
     # with desc(Item.id), it return latest items on top
     items = db.query(Item).order_by(desc(Item.id)).all()
-    if 'username' in session:
+    if session.get('username'):
         logged_in = True
     else:
         logged_in = False
@@ -80,7 +91,7 @@ def show_catalog(category_id):
     # with desc(Item.id), it return latest items on top
     items = db.query(Item).filter_by(category_id=category_id) \
         .order_by(desc(Item.id)).all()
-    if 'username' in session:
+    if session.get('username'):
         logged_in = True
     else:
         logged_in = False
@@ -113,7 +124,6 @@ def show_home_json():
 @app.route('/catalog.xml')
 def show_home_xml():
     categories = get_categories_dict()
-    print 'this is it ', categories[0].items
     response = make_response(
         render_template('catalog.xml', categories=categories), 200)
     response.headers['Content-Type'] = 'application/xml'
@@ -121,9 +131,8 @@ def show_home_xml():
 
 
 @app.route('/catalog/new', methods=['POST', 'GET'])
+@login_required
 def add_item():
-    if 'username' not in session:
-        return redirect(url_for('show_login'))
     name = None
     description = None
     category_id = '0'
@@ -171,7 +180,7 @@ def add_item():
 @app.route('/catalog/<int:category_id>/<int:item_id>/')
 def show_item(category_id, item_id):
     item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
-    if 'username' in session:
+    if session.get('username'):
         logged_in = True
         owner = item.user_id == session['user_id']
     else:
@@ -183,10 +192,11 @@ def show_item(category_id, item_id):
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit',
            methods=['POST', 'GET'])
+@login_required
 def edit_item(category_id, item_id):
     item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
     # protect CSRF attack
-    if not session.get('user_id') or item.user_id != session['user_id']:
+    if item.user_id != session['user_id']:
         return "<script> function myFunction() { " \
                "alert('You are not authorized to edit this item." \
                " Please create your own item" \
@@ -235,10 +245,11 @@ def edit_item(category_id, item_id):
 
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/delete')
+@login_required
 def delete_item(category_id, item_id):
     item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
     # protect CSRF attack
-    if not session.get('user_id') or item.user_id != session['user_id']:
+    if item.user_id != session['user_id']:
         return "<script> function myFunction() { " \
                "alert('You are not authorized to delete this item." \
                " Please create your own item" \
