@@ -56,10 +56,16 @@ class Item(Base):
     photo = Column(String)
     description = Column(String(250))
     category_id = Column(Integer,
-                         ForeignKey('category.id'))
-    category = relationship(Category)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User)
+                         ForeignKey('category.id'),
+                         nullable=False)
+    category = relationship(Category,
+                            single_parent=True,
+                            cascade="all, delete-orphan")
+    user_id = Column(Integer, ForeignKey('user.id'),
+                     nullable=False)
+    user = relationship(User,
+                        single_parent=True,
+                        cascade="all, delete-orphan")
 
     @property
     def serialize(self):
