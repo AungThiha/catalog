@@ -18,54 +18,45 @@ DBSession = sessionmaker(bind=engine)
 # session.commit(). If you're not happy about the changes, you can
 # revert all of them back to the last commit by calling
 # session.rollback()
-session = DBSession()
+db = DBSession()
 
 # predefined Catalogs
-cat1 = Category(name='Soccer')
-cat2 = Category(name='Baseball')
-cat3 = Category(name='Basketball')
-cat4 = Category(name='Frisbee')
-cat5 = Category(name='Snowboarding')
-cat6 = Category(name='Rock Climbing')
-cat7 = Category(name='Foosball')
-cat8 = Category(name='Skating')
-cat9 = Category(name='Hockey')
+categories = ['Soccer', 'Baseball',
+              'Basketball', 'Frisbee',
+              'Snowboarding', 'Rock Climbing',
+              'Foosball', 'Skating', ' Hockey']
 
-session.add(cat1)
-session.add(cat2)
-session.add(cat3)
-session.add(cat4)
-session.add(cat5)
-session.add(cat6)
-session.add(cat7)
-session.add(cat8)
-session.add(cat9)
-session.commit()
+for c in categories:
+    category = Category(name=c)
+    db.add(category)
+
+db.commit()
 
 # dummy user
 user = User(name="aungthiha", email="mr.aungthiha@gmail.com")
-session.add(user)
-session.commit()
+db.add(user)
+db.commit()
+
 
 # dummy items
-item1 = Item(name="Stick", category_id=9, user_id=1)
-item2 = Item(name="Goggles", category_id=5, user_id=1)
-item3 = Item(name="Snowboard", category_id=5, user_id=1)
-item4 = Item(name="Two shinguards", category_id=1, user_id=1)
-item5 = Item(name="Shinguards", category_id=1, user_id=1)
-item6 = Item(name="Frisbee", category_id=4, user_id=1)
-item7 = Item(name="Bat", category_id=2, user_id=1)
-item8 = Item(name="Jersey", category_id=1, user_id=1)
-item9 = Item(name="Soccer Cleats", category_id=1, user_id=1)
-session.add(item1)
-session.add(item2)
-session.add(item3)
-session.add(item4)
-session.add(item5)
-session.add(item6)
-session.add(item7)
-session.add(item8)
-session.add(item9)
-session.commit()
+def add_item(name, category_id):
+    add_item_with_user(name, category_id, 1)
+
+
+def add_item_with_user(name, category_id, user_id):
+    item = Item(name=name, category_id=category_id, user_id=user_id)
+    db.add(item)
+
+add_item("Stick", 9)
+add_item("Goggles", 5)
+add_item("Snowboard", 5)
+add_item("Two shinguards", 1)
+add_item("Shinguards", 1)
+add_item("Frisbee", 4)
+add_item("Bat", 2)
+add_item("Jersey", 1)
+add_item("Soccer Cleats", 1)
+
+db.commit()
 
 print 'Categories added!'
