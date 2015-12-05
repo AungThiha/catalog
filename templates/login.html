@@ -55,6 +55,7 @@
                     type: 'POST',
                     url: '/gconnect?state={{STATE}}',
                     processData: false,
+                    headers: { 'X-CSRFToken': '{{ csrf_token() }}' },
                     data: authResult['code'],
                     contentType: 'application/octet-stream; charset=utf-8',
                     success: function (result) {
@@ -112,6 +113,7 @@
                     url: '/fbconnect?state={{STATE}}',
                     processData: false,
                     data: access_token,
+                    headers: { 'X-CSRFToken': '{{ csrf_token() }}' },
                     contentType: 'application/octet-stream; charset=utf-8',
                     success: function (result) {
                         // Handle or verify the server response if necessary.

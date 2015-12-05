@@ -1,11 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
+    <script>
+        function deleteItem() {
+            $.ajax({
+                url: "{{ url_for('delete_item', category_id=item.category_id, item_id=item.id) }}",
+
+                // define method
+                type: 'post',
+
+                // define header
+                headers: {'X-CSRFToken': '{{ csrf_token() }}'},
+                async: false,
+                success: function () {
+                    window.location.href = "{{ url_for('show_home') }}";
+                }
+            });
+        }
+    </script>
     <section>
         <div class="page-header">
             <h1>{{ item.name }}</h1>
             {% if owner %}
                 <a href="{{ url_for('edit_item', category_id=item.category_id, item_id=item.id) }}">Edit</a> |
-                <a href="{{ url_for('delete_item', category_id=item.category_id, item_id=item.id) }}">Delete</a>
+                <a href='javascript:deleteItem()'>Delete</a>
             {% endif %}
         </div>
         {% if item.photo %}

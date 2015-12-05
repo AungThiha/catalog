@@ -10,6 +10,26 @@
     <meta name="author" content="Aung Thiha">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Catalog App</title>
+    <script>
+        function logout() {
+            $.ajax({
+                url: "{{ url_for('logout') }}",
+
+                // define method
+                type: 'post',
+
+                // define header
+                headers: {'X-CSRFToken': '{{ csrf_token() }}'},
+                async: false,
+                success: function () {
+                    location.reload();
+                },
+                fail: function () {
+                    location.reload();
+                }
+            });
+        }
+    </script>
 </head>
 <body data-target="#main-navigation">
 <nav class="navbar navbar-inverse navbar-fixed-top" id="main-navigation" role="navigation">
@@ -19,7 +39,7 @@
         </div>
         <!-- end navbar-header -->
         {% if logged_in %}
-            <a href="{{ url_for('logout') }}" class="btn btn-danger navbar-btn navbar-right">Logout</a>
+            <a href="javascript:logout()" class="btn btn-danger navbar-btn navbar-right">Logout</a>
         {% else %}
             <a href="{{ url_for('show_login') }}" class="btn btn-success navbar-btn navbar-right">Login</a>
         {% endif %}

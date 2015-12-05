@@ -17,6 +17,9 @@ from flask import Flask, render_template, request, \
 # import oauth2
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 
+# csrf protection
+from flask.ext.seasurf import SeaSurf
+
 # import database stuffs
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
@@ -30,6 +33,10 @@ db = DBSession()
 
 # setup flask app
 app = Flask(__name__)
+
+# csrf protection
+csrf = SeaSurf()
+csrf.init_app(app)
 
 # setup upload files config
 ALLOWED_EXT = ['png', 'jpg', 'jpeg']
@@ -244,7 +251,7 @@ def edit_item(category_id, item_id):
                            item=item, logged_in=True)
 
 
-@app.route('/catalog/<int:category_id>/<int:item_id>/delete')
+@app.route('/catalog/<int:category_id>/<int:item_id>/delete', methods=['POST'])
 @login_required
 def delete_item(category_id, item_id):
     item = db.query(Item).filter_by(id=item_id, category_id=category_id).one()
@@ -265,7 +272,10 @@ def delete_item(category_id, item_id):
         if os.path.exists(abs_file):
             os.remove(abs_file)
     flash('%s Successfully Deleted' % itemname)
-    return redirect(url_for('show_home'))
+    response = make_response(
+            json.dumps('%s Successfully Deleted' % itemname), 200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 
 # Create a state token to prevent request forgery.
@@ -473,7 +483,8 @@ def fbdisconnect():
 
 
 # Disconnect based on provider
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
+@login_required
 def logout():
     if 'provider' in session:
         if session['provider'] == 'google':
@@ -489,10 +500,16 @@ def logout():
         del session['user_id']
         del session['provider']
         flash("You have successfully been logged out.")
-        return redirect(url_for('show_home'))
+        response = make_response(
+            json.dumps("You have successfully been logged out."), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
     else:
         flash("You were not logged in")
-        return redirect(url_for('show_home'))
+        response = make_response(
+            json.dumps("You were not logged in"), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
 
 
 def get_user_id(email):
