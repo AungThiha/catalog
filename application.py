@@ -33,6 +33,7 @@ db = DBSession()
 
 # setup flask app
 app = Flask(__name__)
+app.secret_key = 'super_secret_key'
 
 # csrf protection
 csrf = SeaSurf()
@@ -535,7 +536,6 @@ def create_user(login_session):
     return user.id
 
 
-if __name__ == '__main__':
-    app.secret_key = 'super_secret_key'
-    app.debug = True
-    app.run(host='', port=8080)
+# if __name__ == '__main__':
+#     app.debug = True
+#     app.run(host='', port=8080)
