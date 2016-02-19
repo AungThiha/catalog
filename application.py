@@ -26,7 +26,7 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item, User
 
 # Connect to Database and create database session
-engine = create_engine('sqlite:///catalog.db')
+engine = create_engine('postgres://duwwgnpwekloeh:oLujnvRK3_6zwO5wzYCRuVscoq@ec2-54-83-198-111.compute-1.amazonaws.com:5432/d1qachm673fvj7')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 db = DBSession()
