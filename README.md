@@ -10,6 +10,8 @@ The project consists of:<br>
 * Styling and improving user experience
 * Authentication and authorization
 
+The app is deployed on [heroku](https://warm-retreat-84422.herokuapp.com)
+
 ### Requirements
 * Python 2.7 or above
 * Flask
