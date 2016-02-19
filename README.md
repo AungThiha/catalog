@@ -12,7 +12,6 @@ The project consists of:<br>
 
 ### Requirements
 * Python 2.7 or above
-* SQLite 3
 * Flask
 * sqlalchemy
 * oauth2client
