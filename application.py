@@ -536,6 +536,6 @@ def create_user(login_session):
     return user.id
 
 
-# if __name__ == '__main__':
-#     app.debug = True
-#     app.run(host='', port=8080)
+if __name__ == '__main__':
+    app.debug = True
+    app.run(host='', port=8080)
