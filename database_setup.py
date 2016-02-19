@@ -73,6 +73,6 @@ class Item(Base):
         }
 
 
-engine = create_engine('postgresql://aungthiha@localhost/catalog')
+engine = create_engine('postgres://duwwgnpwekloeh:oLujnvRK3_6zwO5wzYCRuVscoq@ec2-54-83-198-111.compute-1.amazonaws.com:5432/d1qachm673fvj7')
 
 Base.metadata.create_all(engine)
